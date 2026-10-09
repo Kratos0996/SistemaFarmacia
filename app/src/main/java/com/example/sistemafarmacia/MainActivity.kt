@@ -23,14 +23,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.sistemafarmacia.ui.theme.SistemaFarmaciaTheme
 
-// 1. Estructura de datos para los medicamentos
 data class Medicamento(
     val nombre: String,
     val descripcion: String,
     val precio: String
 )
 
-// 2. Colección de datos con la información a mostrar
 val listaMedicamentos = listOf(
     Medicamento("Paracetamol 500mg", "Analgésico y antipirético para aliviar el dolor y la fiebre.", "$4.500"),
     Medicamento("Ibuprofeno 800mg", "Antiinflamatorio indicado para dolores fuertes e inflamación.", "$8.200"),
@@ -82,14 +80,12 @@ fun PharmacyApp() {
         )
         Spacer(modifier = Modifier.height(12.dp))
 
-        // 3. Recorremos la colección utilizando un bucle for para generar las Cards
         for (medicamento in listaMedicamentos) {
             ProductCard(medicamento = medicamento)
         }
     }
 }
 
-// 4. Componente reutilizable para cada Card
 @Composable
 fun ProductCard(medicamento: Medicamento) {
     Card(
