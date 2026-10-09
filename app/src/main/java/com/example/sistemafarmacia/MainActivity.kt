@@ -36,7 +36,7 @@ val listaMedicamentos = listOf(
     Medicamento("Omeprazol 20mg", "Tratamiento para la acidez estomacal y gastritis.", "$11.300"),
     Medicamento("Loratadina 10mg", "Antihistamínico para el alivio de alergias y rinitis.", "$6.800")
 )
-
+//Debo hacer mejoras en cuanto al ingreso de productos y stock hay que automatizar el ingreso de productos
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
