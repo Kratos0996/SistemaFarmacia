@@ -1,6 +1,12 @@
 package com.example.sistemafarmacia
 
 import android.os.Bundle
+
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -34,10 +40,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,6 +52,7 @@ import androidx.compose.ui.unit.sp
 import com.example.sistemafarmacia.ui.theme.SistemaFarmaciaTheme
 
 data class Medicamento(
+    val id: Int,
     val nombre: String,
     val descripcion: String,
     val precio: String,
@@ -76,11 +79,51 @@ val listaCategorias = listOf(
 )
 
 val listaMedicamentos = listOf(
-    Medicamento("Paracetamol 500mg", "Analgésico y antipirético para aliviar el dolor y la fiebre.", "$4.500", "4.8", true, "💊"),
-    Medicamento("Ibuprofeno 800mg", "Antiinflamatorio indicado para dolores fuertes e inflamación.", "$8.200", "4.6", false, "💊"),
-    Medicamento("Amoxicilina 500mg", "Antibiótico para combatir infecciones bacterianas.", "$15.900", "4.9", true, "🧪"),
-    Medicamento("Omeprazol 20mg", "Tratamiento para la acidez estomacal y gastritis.", "$11.300", "4.7", false, "💊"),
-    Medicamento("Loratadina 10mg", "Antihistamínico para el alivio de alergias y rinitis.", "$6.800", "4.5", true, "🌿")
+    Medicamento(
+        id = 1,
+        nombre = "Paracetamol 500mg",
+        descripcion = "Analgésico y antipirético para aliviar el dolor y la fiebre.",
+        precio = "$4.500",
+        calificacion = "4.8",
+        enOferta = true,
+        imagenEmoji = "💊"
+    ),
+    Medicamento(
+        id = 2,
+        nombre = "Ibuprofeno 800mg",
+        descripcion = "Antiinflamatorio indicado para dolores fuertes e inflamación.",
+        precio = "$8.200",
+        calificacion = "4.6",
+        enOferta = false,
+        imagenEmoji = "💊"
+    ),
+    Medicamento(
+        id = 3,
+        nombre = "Amoxicilina 500mg",
+        descripcion = "Antibiótico para combatir infecciones bacterianas.",
+        precio = "$15.900",
+        calificacion = "4.9",
+        enOferta = true,
+        imagenEmoji = "🧪"
+    ),
+    Medicamento(
+        id = 4,
+        nombre = "Omeprazol 20mg",
+        descripcion = "Tratamiento para la acidez estomacal y gastritis.",
+        precio = "$11.300",
+        calificacion = "4.7",
+        enOferta = false,
+        imagenEmoji = "💊"
+    ),
+    Medicamento(
+        id = 5,
+        nombre = "Loratadina 10mg",
+        descripcion = "Antihistamínico para el alivio de alergias y rinitis.",
+        precio = "$6.800",
+        calificacion = "4.5",
+        enOferta = true,
+        imagenEmoji = "🌿"
+    )
 )
 
 // ==========================================
@@ -210,8 +253,25 @@ fun PharmacyApp() {
                 )
             }
 
-            items(medicamentosFiltrados) { medicamento ->
-                ProductCard(medicamento = medicamento)
+            if (medicamentosFiltrados.isEmpty()) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No se encontraron productos",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            } else {
+                items(medicamentosFiltrados, key = { it.id }) { medicamento ->
+                    ProductCard(medicamento = medicamento)
+                }
             }
 
             item {
@@ -245,8 +305,23 @@ fun CategoryCard(categoria: Categoria) {
 // ==========================================
 // CARD PARA MEDICAMENTO
 // ==========================================
+/*
+* Si la cantidad es 0, muestra agregar
+* al presionar agregar , la cantidad pasa a 1
+* Cuando la cantidad es mayor que cero, aparece - y +
+* Al presionar +, la cantidad aumenta
+* Al presionar -, la cantidad disminuye
+* Cuando la cantidad es 0, vuelve a aparecer agregar
+* En la barra inferior se ve la suma de las cantidades de todos los productos
+* */
+
 @Composable
-fun ProductCard(medicamento: Medicamento) {
+fun ProductCard(
+    medicamento: Medicamento,
+    quantity: Int = 0,
+    onIncrease: () -> Unit = {},
+    onDecrease: () -> Unit = {}
+) {
     Card(
         modifier = Modifier.fillMaxWidth()
     ) {
