@@ -34,6 +34,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -68,65 +69,6 @@ data class Categoria(
 )
 
 // ==========================================
-// COLECCIONES DE DATOS
-// ==========================================
-val listaCategorias = listOf(
-    Categoria("💊", "Medicamentos"),
-    Categoria("🍊", "Vitaminas"),
-    Categoria("🩹", "Cuidado Personal"),
-    Categoria("👶", "Bebé y Maternidad"),
-    Categoria("🧴", "Dermocosmética")
-)
-
-val listaMedicamentos = listOf(
-    Medicamento(
-        id = 1,
-        nombre = "Paracetamol 500mg",
-        descripcion = "Analgésico y antipirético para aliviar el dolor y la fiebre.",
-        precio = "$4.500",
-        calificacion = "4.8",
-        enOferta = true,
-        imagenEmoji = "💊"
-    ),
-    Medicamento(
-        id = 2,
-        nombre = "Ibuprofeno 800mg",
-        descripcion = "Antiinflamatorio indicado para dolores fuertes e inflamación.",
-        precio = "$8.200",
-        calificacion = "4.6",
-        enOferta = false,
-        imagenEmoji = "💊"
-    ),
-    Medicamento(
-        id = 3,
-        nombre = "Amoxicilina 500mg",
-        descripcion = "Antibiótico para combatir infecciones bacterianas.",
-        precio = "$15.900",
-        calificacion = "4.9",
-        enOferta = true,
-        imagenEmoji = "🧪"
-    ),
-    Medicamento(
-        id = 4,
-        nombre = "Omeprazol 20mg",
-        descripcion = "Tratamiento para la acidez estomacal y gastritis.",
-        precio = "$11.300",
-        calificacion = "4.7",
-        enOferta = false,
-        imagenEmoji = "💊"
-    ),
-    Medicamento(
-        id = 5,
-        nombre = "Loratadina 10mg",
-        descripcion = "Antihistamínico para el alivio de alergias y rinitis.",
-        precio = "$6.800",
-        calificacion = "4.5",
-        enOferta = true,
-        imagenEmoji = "🌿"
-    )
-)
-
-// ==========================================
 // ACTIVIDAD PRINCIPAL
 // ==========================================
 class MainActivity : ComponentActivity() {
@@ -149,10 +91,91 @@ class MainActivity : ComponentActivity() {
 fun PharmacyApp() {
     var searchQuery by remember { mutableStateOf("") }
 
+    var cartQuantity by remember { mutableStateOf<Map<Int, Int>>(emptyMap()) }
+
+// ==========================================
+// COLECCIONES DE DATOS
+// ==========================================
+    val listaCategorias = listOf(
+        Categoria("💊", "Medicamentos"),
+        Categoria("🍊", "Vitaminas"),
+        Categoria("🩹", "Cuidado Personal"),
+        Categoria("👶", "Bebé y Maternidad"),
+        Categoria("🧴", "Dermocosmética")
+    )
+
+    val listaMedicamentos = listOf(
+        Medicamento(
+            id = 1,
+            nombre = "Paracetamol 500mg",
+            descripcion = "Analgésico y antipirético para aliviar el dolor y la fiebre.",
+            precio = "$4.500",
+            calificacion = "4.8",
+            enOferta = true,
+            imagenEmoji = "💊"
+        ),
+        Medicamento(
+            id = 2,
+            nombre = "Ibuprofeno 800mg",
+            descripcion = "Antiinflamatorio indicado para dolores fuertes e inflamación.",
+            precio = "$8.200",
+            calificacion = "4.6",
+            enOferta = false,
+            imagenEmoji = "💊"
+        ),
+        Medicamento(
+            id = 3,
+            nombre = "Amoxicilina 500mg",
+            descripcion = "Antibiótico para combatir infecciones bacterianas.",
+            precio = "$15.900",
+            calificacion = "4.9",
+            enOferta = true,
+            imagenEmoji = "🧪"
+        ),
+        Medicamento(
+            id = 4,
+            nombre = "Omeprazol 20mg",
+            descripcion = "Tratamiento para la acidez estomacal y gastritis.",
+            precio = "$11.300",
+            calificacion = "4.7",
+            enOferta = false,
+            imagenEmoji = "💊"
+        ),
+        Medicamento(
+            id = 5,
+            nombre = "Loratadina 10mg",
+            descripcion = "Antihistamínico para el alivio de alergias y rinitis.",
+            precio = "$6.800",
+            calificacion = "4.5",
+            enOferta = true,
+            imagenEmoji = "🌿"
+        )
+    )
+
+
     val medicamentosFiltrados = listaMedicamentos.filter {
         it.nombre.contains(searchQuery, ignoreCase = true) ||
                 it.descripcion.contains(searchQuery, ignoreCase = true)
     }
+
+    fun increaseQuantity(medicamentoId: Int) {
+        val currentQuantity = cartQuantity[medicamentoId] ?: 0
+
+        cartQuantity = cartQuantity + (medicamentoId to (currentQuantity + 1))
+
+    }
+
+    fun decreaseQuantity(medicamentoId: Int) {
+        val currentQuantity = cartQuantity[medicamentoId] ?: 0
+
+        cartQuantity = if (currentQuantity > 1) {
+            cartQuantity + (medicamentoId to (currentQuantity - 1))
+        } else {
+            cartQuantity - medicamentoId
+        }
+    }
+
+    val cartCount = cartQuantity.values.sum()
 
     Scaffold(
         topBar = {
@@ -177,7 +200,7 @@ fun PharmacyApp() {
                     selected = false,
                     onClick = {},
                     icon = { Text("🛒") },
-                    label = { Text("Carrito") }
+                    label = { Text("Carrito ($cartCount)") }
                 )
                 NavigationBarItem(
                     selected = false,
@@ -270,7 +293,13 @@ fun PharmacyApp() {
                 }
             } else {
                 items(medicamentosFiltrados, key = { it.id }) { medicamento ->
-                    ProductCard(medicamento = medicamento)
+                    val quantity = cartQuantity[medicamento.id] ?: 0
+                    ProductCard(
+                        medicamento = medicamento,
+                        quantity = quantity,
+                        onIncrease = { increaseQuantity(medicamento.id) },
+                        onDecrease = { decreaseQuantity(medicamento.id) }
+                    )
                 }
             }
 
@@ -420,16 +449,43 @@ fun ProductCard(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
-
-                    Button(
-                        onClick = { },
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text(
-                            text = "Agregar",
-                            style = MaterialTheme.typography.labelMedium
-                        )
+                    if (quantity == 0) {
+                        Button(
+                            onClick = onIncrease,
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text(
+                                text = "Agregar",
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        }
+                    } else {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            OutlinedButton(
+                                onClick = onDecrease,
+                                shape = RoundedCornerShape(8.dp),
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                            ) {
+                                Text(text = "-")
+                            }
+                            Text(
+                                text = quantity.toString(),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 4.dp)
+                            )
+                            OutlinedButton(
+                                onClick = onIncrease,
+                                shape = RoundedCornerShape(8.dp),
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                            ) {
+                                Text(text = "+")
+                            }
+                        }
                     }
                 }
             }
