@@ -50,6 +50,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.example.sistemafarmacia.ui.theme.SistemaFarmaciaTheme
 
 data class Medicamento(
@@ -86,12 +90,17 @@ class MainActivity : ComponentActivity() {
 // ==========================================
 // PANTALLA PRINCIPAL
 // ==========================================
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PharmacyApp() {
     var searchQuery by remember { mutableStateOf("") }
 
     var cartQuantity by remember { mutableStateOf<Map<Int, Int>>(emptyMap()) }
+
+    val navController = rememberNavController()
+
+
 
 // ==========================================
 // COLECCIONES DE DATOS
@@ -177,136 +186,282 @@ fun PharmacyApp() {
 
     val cartCount = cartQuantity.values.sum()
 
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route ?: "inicio"
+
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "GestorPharma",
-                        fontWeight = FontWeight.Bold
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surface)
+            ) {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = "GestorPharma",
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                )
+                if (currentRoute == "inicio") {
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        placeholder = { Text("Buscar medicamento...") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .padding(bottom = 8.dp),
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp)
                     )
                 }
-            )
+            }
         },
         bottomBar = {
             NavigationBar {
                 NavigationBarItem(
-                    selected = true,
-                    onClick = {},
+                    selected = currentRoute == "inicio",
+                    onClick = {
+                        navController.navigate("inicio") {
+                            popUpTo("inicio") { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
                     icon = { Text("🏠") },
                     label = { Text("Inicio") }
                 )
                 NavigationBarItem(
-                    selected = false,
-                    onClick = {},
+                    selected = currentRoute == "carrito",
+                    onClick = {
+                        navController.navigate("carrito") {
+                            popUpTo("inicio") { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
                     icon = { Text("🛒") },
                     label = { Text("Carrito ($cartCount)") }
                 )
                 NavigationBarItem(
-                    selected = false,
-                    onClick = {},
+                    selected = currentRoute == "perfil",
+                    onClick = {
+                        navController.navigate("perfil") {
+                            popUpTo("inicio") { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
                     icon = { Text("👤") },
                     label = { Text("Perfil") }
                 )
             }
         }
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+        NavHost(
+            navController = navController,
+            startDestination = "inicio",
+            modifier = Modifier.padding(innerPadding)
         ) {
-            // ENCABEZADO
+            composable("inicio") {
+                InicioScreen(
+                    listaCategorias = listaCategorias,
+                    medicamentosFiltrados = medicamentosFiltrados,
+                    cartQuantity = cartQuantity,
+                    onIncrease = { increaseQuantity(it) },
+                    onDecrease = { decreaseQuantity(it) }
+                )
+            }
+            composable("carrito") {
+                CarritoScreen(
+                    cartQuantity = cartQuantity,
+                    listaMedicamentos = listaMedicamentos,
+                    onIncrease = { increaseQuantity(it) },
+                    onDecrease = { decreaseQuantity(it) }
+                )
+            }
+            composable("perfil") {
+                PerfilScreen()
+            }
+        }
+    }
+}
+
+// ==========================================
+// PANTALLA INICIO
+// ==========================================
+@Composable
+fun InicioScreen(
+    listaCategorias: List<Categoria>,
+    medicamentosFiltrados: List<Medicamento>,
+    cartQuantity: Map<Int, Int>,
+    onIncrease: (Int) -> Unit,
+    onDecrease: (Int) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // ENCABEZADO
+        item {
+            Column {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Hola 👋",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "¿Qué necesitas hoy?",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        // SECCIÓN DE CATEGORÍAS
+        item {
+            Column {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Categorías",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(listaCategorias) { cat ->
+                        CategoryCard(categoria = cat)
+                    }
+                }
+            }
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Medicamentos disponibles",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        if (medicamentosFiltrados.isEmpty()) {
             item {
-                Column {
-                    Spacer(modifier = Modifier.height(8.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
                     Text(
-                        text = "Hola 👋",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "¿Qué necesitas hoy?",
+                        text = "No se encontraron productos",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
-
-            // BUSCADOR
-            item {
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    label = { Text("Buscar medicamento") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+        } else {
+            items(medicamentosFiltrados, key = { it.id }) { medicamento ->
+                val quantity = cartQuantity[medicamento.id] ?: 0
+                ProductCard(
+                    medicamento = medicamento,
+                    quantity = quantity,
+                    onIncrease = { onIncrease(medicamento.id) },
+                    onDecrease = { onDecrease(medicamento.id) }
                 )
             }
+        }
 
-            // SECCIÓN DE CATEGORÍAS
-            item {
-                Column {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Categorías",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(listaCategorias) { cat ->
-                            CategoryCard(categoria = cat)
-                        }
-                    }
-                }
-            }
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
 
+// ==========================================
+// PANTALLA CARRITO
+// ==========================================
+@Composable
+fun CarritoScreen(
+    cartQuantity: Map<Int, Int>,
+    listaMedicamentos: List<Medicamento>,
+    onIncrease: (Int) -> Unit,
+    onDecrease: (Int) -> Unit
+) {
+    val itemsEnCarrito = listaMedicamentos.filter { (cartQuantity[it.id] ?: 0) > 0 }
+
+    if (itemsEnCarrito.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Tu carrito está vacío 🛒",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    } else {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
             item {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Medicamentos disponibles",
+                    text = "Tu Carrito de Compras",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
             }
 
-            if (medicamentosFiltrados.isEmpty()) {
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 32.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "No se encontraron productos",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            } else {
-                items(medicamentosFiltrados, key = { it.id }) { medicamento ->
-                    val quantity = cartQuantity[medicamento.id] ?: 0
-                    ProductCard(
-                        medicamento = medicamento,
-                        quantity = quantity,
-                        onIncrease = { increaseQuantity(medicamento.id) },
-                        onDecrease = { decreaseQuantity(medicamento.id) }
-                    )
-                }
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
+            items(itemsEnCarrito, key = { it.id }) { medicamento ->
+                val quantity = cartQuantity[medicamento.id] ?: 0
+                ProductCard(
+                    medicamento = medicamento,
+                    quantity = quantity,
+                    onIncrease = { onIncrease(medicamento.id) },
+                    onDecrease = { onDecrease(medicamento.id) }
+                )
             }
         }
+    }
+}
+
+// ==========================================
+// PANTALLA PERFIL
+// ==========================================
+@Composable
+fun PerfilScreen() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(
+            text = "👤",
+            fontSize = 64.sp
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = "Usuario",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
 
