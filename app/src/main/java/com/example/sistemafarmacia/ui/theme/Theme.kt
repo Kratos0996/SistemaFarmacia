@@ -12,32 +12,52 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = PharmaDarkPrimary,
+    onPrimary = PharmaDarkOnPrimary,
+    primaryContainer = PharmaDarkPrimaryContainer,
+    onPrimaryContainer = PharmaDarkOnPrimaryContainer,
+    secondary = PharmaDarkSecondary,
+    onSecondary = PharmaDarkOnSecondary,
+    secondaryContainer = PharmaDarkSecondaryContainer,
+    onSecondaryContainer = PharmaDarkOnSecondaryContainer,
+    tertiary = PharmaDarkTertiary,
+    onTertiary = PharmaDarkOnTertiary,
+    tertiaryContainer = PharmaDarkTertiaryContainer,
+    onTertiaryContainer = PharmaDarkOnTertiaryContainer,
+    background = PharmaDarkBackground,
+    onBackground = PharmaDarkOnBackground,
+    surface = PharmaDarkSurface,
+    onSurface = PharmaDarkOnSurface,
+    surfaceVariant = PharmaDarkSurfaceVariant,
+    onSurfaceVariant = PharmaDarkOnSurfaceVariant
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    primary = PharmaPrimary,
+    onPrimary = PharmaOnPrimary,
+    primaryContainer = PharmaPrimaryContainer,
+    onPrimaryContainer = PharmaOnPrimaryContainer,
+    secondary = PharmaSecondary,
+    onSecondary = PharmaOnSecondary,
+    secondaryContainer = PharmaSecondaryContainer,
+    onSecondaryContainer = PharmaOnSecondaryContainer,
+    tertiary = PharmaTertiary,
+    onTertiary = PharmaOnTertiary,
+    tertiaryContainer = PharmaTertiaryContainer,
+    onTertiaryContainer = PharmaOnTertiaryContainer,
+    background = PharmaBackground,
+    onBackground = PharmaOnBackground,
+    surface = PharmaSurface,
+    onSurface = PharmaOnSurface,
+    surfaceVariant = PharmaSurfaceVariant,
+    onSurfaceVariant = PharmaOnSurfaceVariant
 )
 
 @Composable
 fun SistemaFarmaciaTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    // Se establece en false por defecto para dar prioridad a la paleta épica personalizada
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
