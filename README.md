@@ -2,7 +2,7 @@
 
 Aplicación móvil Android para una farmacia, desarrollada con Kotlin y Jetpack Compose como proyecto de la asignatura Aplicativos Móviles.
 
-Autor: Kevin ([@Kratos0996](https://github.com/Kratos0996))
+Autor: Kevin Alarcón Muñoz ([@Kratos0996](https://github.com/Kratos0996))
 
 ---
 
