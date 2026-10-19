@@ -12,6 +12,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +31,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -64,7 +66,8 @@ data class Medicamento(
     val calificacion: String = "4.8",
     val enOferta: Boolean = false,
     val imagenEmoji: String = "💊",
-    val imagenRes: Int? = null
+    val imagenRes: Int? = null,
+    val categoria: String = "Medicamentos"
 )
 
 data class Categoria(
@@ -95,12 +98,10 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun PharmacyApp() {
     var searchQuery by remember { mutableStateOf("") }
-
+    var selectedCategory by remember { mutableStateOf<String?>(null) }
     var cartQuantity by remember { mutableStateOf<Map<Int, Int>>(emptyMap()) }
 
     val navController = rememberNavController()
-
-
 
 // ==========================================
 // COLECCIONES DE DATOS
@@ -121,62 +122,65 @@ fun PharmacyApp() {
             precio = "$4.500",
             calificacion = "4.8",
             enOferta = true,
-            imagenEmoji = "💊"
+            imagenEmoji = "💊",
+            categoria = "Medicamentos"
         ),
         Medicamento(
             id = 2,
-            nombre = "Ibuprofeno 800mg",
-            descripcion = "Antiinflamatorio indicado para dolores fuertes e inflamación.",
+            nombre = "Vitamina C 1000mg",
+            descripcion = "Suplemento vitamínico para reforzar el sistema inmune.",
             precio = "$8.200",
             calificacion = "4.6",
             enOferta = false,
-            imagenEmoji = "💊"
+            imagenEmoji = "🍊",
+            categoria = "Vitaminas"
         ),
         Medicamento(
             id = 3,
-            nombre = "Amoxicilina 500mg",
-            descripcion = "Antibiótico para combatir infecciones bacterianas.",
-            precio = "$15.900",
+            nombre = "Alcohol en Gel 250ml",
+            descripcion = "Desinfectante para manos de uso diario.",
+            precio = "$3.900",
             calificacion = "4.9",
             enOferta = true,
-            imagenEmoji = "🧪"
+            imagenEmoji = "🩹",
+            categoria = "Cuidado Personal"
         ),
         Medicamento(
             id = 4,
-            nombre = "Omeprazol 20mg",
-            descripcion = "Tratamiento para la acidez estomacal y gastritis.",
-            precio = "$11.300",
+            nombre = "Pañales Etapa 1",
+            descripcion = "Pañales ultra absorbentes para recién nacidos.",
+            precio = "$18.300",
             calificacion = "4.7",
             enOferta = false,
-            imagenEmoji = "💊"
+            imagenEmoji = "👶",
+            categoria = "Bebé y Maternidad"
         ),
         Medicamento(
             id = 5,
-            nombre = "Loratadina 10mg",
-            descripcion = "Antihistamínico para el alivio de alergias y rinitis.",
-            precio = "$6.800",
+            nombre = "Protector Solar FPS 50",
+            descripcion = "Protección solar facial de alta eficacia.",
+            precio = "$14.800",
             calificacion = "4.5",
             enOferta = true,
-            imagenEmoji = "🌿"
+            imagenEmoji = "🧴",
+            categoria = "Dermocosmética"
         )
     )
 
-
-    val medicamentosFiltrados = listaMedicamentos.filter {
-        it.nombre.contains(searchQuery, ignoreCase = true) ||
-                it.descripcion.contains(searchQuery, ignoreCase = true)
+    val medicamentosFiltrados = listaMedicamentos.filter { med ->
+        val matchesSearch = med.nombre.contains(searchQuery, ignoreCase = true) ||
+                med.descripcion.contains(searchQuery, ignoreCase = true)
+        val matchesCategory = selectedCategory == null || med.categoria.equals(selectedCategory, ignoreCase = true)
+        matchesSearch && matchesCategory
     }
 
     fun increaseQuantity(medicamentoId: Int) {
         val currentQuantity = cartQuantity[medicamentoId] ?: 0
-
         cartQuantity = cartQuantity + (medicamentoId to (currentQuantity + 1))
-
     }
 
     fun decreaseQuantity(medicamentoId: Int) {
         val currentQuantity = cartQuantity[medicamentoId] ?: 0
-
         cartQuantity = if (currentQuantity > 1) {
             cartQuantity + (medicamentoId to (currentQuantity - 1))
         } else {
@@ -185,6 +189,14 @@ fun PharmacyApp() {
     }
 
     val cartCount = cartQuantity.values.sum()
+
+    // Cálculo del valor total del carrito
+    val totalCartValue = listaMedicamentos.sumOf { med ->
+        val qty = cartQuantity[med.id] ?: 0
+        val priceNum = med.precio.filter { it.isDigit() }.toIntOrNull() ?: 0
+        qty * priceNum
+    }
+    val totalFormatted = "$${"%,d".format(totalCartValue).replace(",", ".")}"
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: "inicio"
@@ -268,6 +280,10 @@ fun PharmacyApp() {
             composable("inicio") {
                 InicioScreen(
                     listaCategorias = listaCategorias,
+                    selectedCategory = selectedCategory,
+                    onCategorySelect = { catName ->
+                        selectedCategory = if (selectedCategory == catName) null else catName
+                    },
                     medicamentosFiltrados = medicamentosFiltrados,
                     cartQuantity = cartQuantity,
                     onIncrease = { increaseQuantity(it) },
@@ -278,6 +294,7 @@ fun PharmacyApp() {
                 CarritoScreen(
                     cartQuantity = cartQuantity,
                     listaMedicamentos = listaMedicamentos,
+                    totalFormatted = totalFormatted,
                     onIncrease = { increaseQuantity(it) },
                     onDecrease = { decreaseQuantity(it) }
                 )
@@ -295,6 +312,8 @@ fun PharmacyApp() {
 @Composable
 fun InicioScreen(
     listaCategorias: List<Categoria>,
+    selectedCategory: String?,
+    onCategorySelect: (String) -> Unit,
     medicamentosFiltrados: List<Medicamento>,
     cartQuantity: Map<Int, Int>,
     onIncrease: (Int) -> Unit,
@@ -338,7 +357,11 @@ fun InicioScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(listaCategorias) { cat ->
-                        CategoryCard(categoria = cat)
+                        CategoryCard(
+                            categoria = cat,
+                            isSelected = selectedCategory == cat.nombre,
+                            onClick = { onCategorySelect(cat.nombre) }
+                        )
                     }
                 }
             }
@@ -393,6 +416,7 @@ fun InicioScreen(
 fun CarritoScreen(
     cartQuantity: Map<Int, Int>,
     listaMedicamentos: List<Medicamento>,
+    totalFormatted: String,
     onIncrease: (Int) -> Unit,
     onDecrease: (Int) -> Unit
 ) {
@@ -436,6 +460,37 @@ fun CarritoScreen(
                     onDecrease = { onDecrease(medicamento.id) }
                 )
             }
+
+            // TOTAL DEL CARRITO
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Total a pagar:",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                        Text(
+                            text = totalFormatted,
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -469,8 +524,19 @@ fun PerfilScreen() {
 // CARD PARA CATEGORÍA
 // ==========================================
 @Composable
-fun CategoryCard(categoria: Categoria) {
-    Card {
+fun CategoryCard(
+    categoria: Categoria,
+    isSelected: Boolean = false,
+    onClick: () -> Unit = {}
+) {
+    Card(
+        modifier = Modifier.clickable { onClick() },
+        colors = if (isSelected) {
+            CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+        } else {
+            CardDefaults.cardColors()
+        }
+    ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -480,7 +546,8 @@ fun CategoryCard(categoria: Categoria) {
             Text(
                 text = categoria.nombre,
                 style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
             )
         }
     }
