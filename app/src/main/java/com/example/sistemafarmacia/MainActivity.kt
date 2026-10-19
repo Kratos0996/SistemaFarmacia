@@ -164,6 +164,56 @@ fun PharmacyApp() {
             enOferta = true,
             imagenEmoji = "🧴",
             categoria = "Dermocosmética"
+        ),
+        Medicamento(
+            id = 6,
+            nombre = "Ibuprofeno 400mg",
+            descripcion = "Antiinflamatorio y analgésico para el alivio de dolores articulares.",
+            precio = "$6.200",
+            calificacion = "4.7",
+            enOferta = false,
+            imagenEmoji = "💊",
+            categoria = "Medicamentos"
+        ),
+        Medicamento(
+            id = 7,
+            nombre = "Multivitamínico Completo",
+            descripcion = "Complejo B, zinc y minerales para la energía diaria.",
+            precio = "$12.900",
+            calificacion = "4.9",
+            enOferta = true,
+            imagenEmoji = "🍊",
+            categoria = "Vitaminas"
+        ),
+        Medicamento(
+            id = 8,
+            nombre = "Jabón Neutro Hipoalergénico",
+            descripcion = "Limpieza suave para pieles sensibles y delicadas.",
+            precio = "$5.400",
+            calificacion = "4.6",
+            enOferta = false,
+            imagenEmoji = "🩹",
+            categoria = "Cuidado Personal"
+        ),
+        Medicamento(
+            id = 9,
+            nombre = "Fórmula Láctea Maternidad 1",
+            descripcion = "Nutrición completa enriquecida con DHA e Hierro para lactantes.",
+            precio = "$24.500",
+            calificacion = "4.8",
+            enOferta = true,
+            imagenEmoji = "👶",
+            categoria = "Bebé y Maternidad"
+        ),
+        Medicamento(
+            id = 10,
+            nombre = "Sérum Ácido Hialurónico",
+            descripcion = "Hidratante facial intensivo para prevenir líneas de expresión.",
+            precio = "$19.900",
+            calificacion = "4.9",
+            enOferta = false,
+            imagenEmoji = "🧴",
+            categoria = "Dermocosmética"
         )
     )
 
