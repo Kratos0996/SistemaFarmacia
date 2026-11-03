@@ -12,7 +12,7 @@ GestorPharma es una farmacia que ofrece medicamentos, vitaminas, productos de cu
 
 ## 2. Objetivo de la aplicación
 
-Permitir que el cliente explore el catálogo de la farmacia, encuentre lo que necesita por búsqueda o por categoría, arme su pedido y vea en todo momento cuánto va a pagar.
+Permitir que el cliente explore el catálogo de la farmacia, encuentre lo que necesita por búsqueda o por categoría, arme su pedido y vea en todo momento cuánto va a pagar, conservando los datos localmente en el dispositivo.
 
 ---
 
@@ -22,7 +22,7 @@ La navegación se implementa con Navigation Compose (`NavController` y `NavHost`
 
 | Pantalla | Ruta | Descripción |
 |---|---|---|
-| Inicio | `inicio` | Saludo, buscador, categorías seleccionables (`LazyRow`) y lista de medicamentos (`LazyColumn`) con precio, calificación, etiqueta de oferta y controles para agregar al pedido. |
+| Inicio | `inicio` | Saludo, buscador en TopBar, categorías seleccionables (`LazyRow`) y lista de medicamentos (`LazyColumn`) con precio, calificación, etiqueta de oferta y controles para agregar al pedido. |
 | Carrito | `carrito` | Muestra solo los productos agregados, permite cambiar sus cantidades y calcula el total a pagar. Si no hay productos, muestra un mensaje de carrito vacío. |
 | Perfil | `perfil` | Pantalla del usuario. |
 
@@ -30,47 +30,54 @@ La barra inferior indica la pestaña activa y muestra la cantidad total de produ
 
 ---
 
-## 4. Funcionalidades interactivas
+## 4. Funcionalidades interactivas y Persistencia
 
-### Funcionalidad 1: carrito con cantidades (trabajada en clase)
+### Funcionalidad 1: Carrito con cantidades y almacenamiento local en Room
 
-Cada producto muestra un botón "Agregar". Al pulsarlo aparecen los controles "-" y "+" con la cantidad seleccionada. Si la cantidad llega a 0, vuelve el botón "Agregar". Las cantidades se reflejan en la pantalla Carrito y en el contador de la barra inferior.
+Cada producto muestra un botón "Agregar". Al pulsarlo aparecen los controles "-" y "+" con la cantidad seleccionada. Las cantidades se guardan de forma persistente en una base de datos local **Room (SQLite)** en la tabla `cart_items`, manteniendo el estado del carrito incluso al reiniciar la aplicación.
 
-Cómo funciona: el estado es un `Map<Int, Int>` (id del producto a cantidad) guardado con `mutableStateOf` en `PharmacyApp` y compartido con las pantallas mediante elevación de estado (state hoisting), con los eventos `onIncrease` y `onDecrease`.
+### Funcionalidad 2: Filtro por categorías
 
-### Funcionalidad 2: filtro por categorías (nueva)
+Las categorías (Medicamentos, Vitaminas, Cuidado Personal, Bebé y Maternidad, Dermocosmética) se muestran como tarjetas seleccionables. Al tocar una, la lista muestra solo los productos de esa categoría; al tocarla de nuevo, se quita el filtro. Funciona en conjunto con el buscador de la barra superior (`TopBar`).
 
-Las categorías (Medicamentos, Vitaminas, Cuidado Personal, Bebé y Maternidad, Dermocosmética) se muestran como tarjetas seleccionables. Al tocar una, la lista muestra solo los productos de esa categoría; al tocarla de nuevo, se quita el filtro. Funciona en conjunto con el buscador.
+### Funcionalidad 3: Cálculo automático del total del pedido
 
-Cómo funciona: la categoría elegida se guarda como estado (`selectedCategory`) y la lista se calcula con `filter`, combinando el texto de búsqueda y la categoría.
+En el Carrito, el total a pagar se recalcula automáticamente cada vez que se agrega, aumenta o disminuye un producto, y se muestra en una tarjeta resumen formateada en pesos colombianos.
 
-### Funcionalidad 3: cálculo automático del total del pedido (nueva)
+### Persistencia de Datos Local (Room Database)
 
-En el Carrito, el total a pagar se recalcula cada vez que se agrega, aumenta o disminuye un producto, y se muestra con formato de pesos colombianos.
-
-Cómo funciona: se multiplica la cantidad de cada producto por su precio y se suma con `sumOf`, a partir del mismo estado del carrito, por lo que se actualiza automáticamente.
-
-Nota: la búsqueda de productos por nombre o descripción también está disponible en Inicio, pero no se cuenta como una de las tres funcionalidades.
+La aplicación utiliza la biblioteca de persistencia **Room Database** con procesador **KSP** para almacenar y consultar datos localmente:
+- **`medicamentos`**: Almacena el catálogo con los 10 productos disponibles.
+- **`cart_items`**: Guarda el estado y cantidad del carrito de compras.
 
 ---
 
 ## 5. Componentes y organización del código
 
-- Data classes: `Medicamento` y `Categoria`.
-- Colecciones de datos: 10 medicamentos y 5 categorías definidos localmente.
-- Listas dinámicas: `LazyColumn` y `LazyRow`, generadas a partir de las colecciones.
-- Composables reutilizables: `ProductCard` (usado en Inicio y Carrito) y `CategoryCard`.
-- Material 3: `Scaffold`, `TopAppBar`, `NavigationBar`, `Card`, `Button`, `OutlinedButton`, `OutlinedTextField` y `Surface`.
-- Tema personalizado: `Color.kt`, `Theme.kt` y `Type.kt` en el paquete `ui.theme`.
+El proyecto implementa la arquitectura recomendada por Google (UI -> ViewModel -> Repository -> Room DAO):
 
 ```
 app/src/main/java/com/example/sistemafarmacia/
-├── MainActivity.kt        # Modelos, navegación, pantallas y componentes
+├── MainActivity.kt                  # Actividad principal, Compose UI y Navigation
+├── data/
+│   ├── local/
+│   │   ├── CartItemEntity.kt        # Entidad Room para ítems del carrito
+│   │   ├── MedicamentoEntity.kt     # Entidad Room para el catálogo de medicamentos
+│   │   ├── FarmaciaDao.kt           # Data Access Object (DAO) con flujos reactivos
+│   │   └── FarmaciaDatabase.kt      # Instancia Singleton de la base de datos Room
+│   └── repository/
+│       └── FarmaciaRepository.kt    # Repositorio (Single Source of Truth)
+├── viewmodel/
+│   └── FarmaciaViewModel.kt         # ViewModel y Factory con Kotlin StateFlow
 └── ui/theme/
     ├── Color.kt
     ├── Theme.kt
     └── Type.kt
 ```
+
+- **Data classes & Entities**: `Medicamento`, `Categoria`, `MedicamentoEntity`, `CartItemEntity`.
+- **Patrón Repositorio & ViewModel**: Manejo del estado mediante `StateFlow` y flujos reactivos `Flow` / `combine`.
+- **Material 3**: `Scaffold`, `TopAppBar`, `NavigationBar`, `Card`, `Button`, `OutlinedButton`, `OutlinedTextField` y `Surface`.
 
 ---
 
@@ -91,16 +98,16 @@ Requisitos: Android Studio (versión reciente) y un emulador o dispositivo Andro
    git clone https://github.com/Kratos0996/SistemaFarmacia.git
    ```
 2. Abrir la carpeta del proyecto en Android Studio (File > Open).
-3. Esperar a que Gradle sincronice las dependencias.
+3. Esperar a que Gradle y KSP sincronicen las dependencias.
 4. Seleccionar un emulador o conectar un dispositivo con la depuración USB activada.
-5. Ejecutar la aplicación con el botón Run.
+5. Ejecutar la aplicación con el botón **Run**.
 
 ---
 
 ## 8. Alcance de esta versión
 
-Esta es la primera versión del proyecto. Los datos son locales y no incluye base de datos, conexión a API, autenticación, persistencia ni ViewModel; el estado se maneja con `remember` y `mutableStateOf`.
+Esta versión incluye **persistencia local mediante Room Database (SQLite)**, **Patrón Repositorio** y **ViewModel con Kotlin StateFlow** para una arquitectura limpia y reactiva. Los datos del carrito y el catálogo de 10 productos se mantienen de forma persistente en el dispositivo.
 
 ## 9. Tecnologías
 
-Kotlin, Jetpack Compose, Material 3, Navigation Compose y Android Studio.
+Kotlin, Jetpack Compose, Room Database (SQLite), KSP, Coroutines & StateFlow, Material 3, Navigation Compose y Android Studio.
