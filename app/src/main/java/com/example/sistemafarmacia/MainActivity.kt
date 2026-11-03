@@ -1,12 +1,6 @@
 package com.example.sistemafarmacia
 
 import android.os.Bundle
-
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -43,20 +37,28 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.sistemafarmacia.data.local.FarmaciaDatabase
+import com.example.sistemafarmacia.data.repository.FarmaciaRepository
 import com.example.sistemafarmacia.ui.theme.SistemaFarmaciaTheme
+import com.example.sistemafarmacia.viewmodel.FarmaciaViewModel
+import com.example.sistemafarmacia.viewmodel.FarmaciaViewModelFactory
 
 data class Medicamento(
     val id: Int,
@@ -82,9 +84,15 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val dao = FarmaciaDatabase.getDatabase(applicationContext).farmaciaDao()
+        val repository = FarmaciaRepository(dao)
+        val factory = FarmaciaViewModelFactory(repository)
+
         setContent {
             SistemaFarmaciaTheme {
-                PharmacyApp()
+                val farmaciaViewModel: FarmaciaViewModel = viewModel(factory = factory)
+                PharmacyApp(viewModel = farmaciaViewModel)
             }
         }
     }
@@ -96,12 +104,123 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PharmacyApp() {
-    var searchQuery by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf<String?>(null) }
-    var cartQuantity by remember { mutableStateOf<Map<Int, Int>>(emptyMap()) }
+fun PharmacyApp(viewModel: FarmaciaViewModel) {
+    val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
+    val selectedCategory by viewModel.selectedCategory.collectAsStateWithLifecycle()
+    val cartQuantity by viewModel.cartQuantity.collectAsStateWithLifecycle()
+    val listaMedicamentos by viewModel.listaMedicamentos.collectAsStateWithLifecycle()
+    val medicamentosFiltrados by viewModel.medicamentosFiltrados.collectAsStateWithLifecycle()
 
     val navController = rememberNavController()
+
+    val defaultMedicamentos = remember {
+        listOf(
+            Medicamento(
+                id = 1,
+                nombre = "Paracetamol 500mg",
+                descripcion = "Analgésico y antipirético para aliviar el dolor y la fiebre.",
+                precio = "$4.500",
+                calificacion = "4.8",
+                enOferta = true,
+                imagenEmoji = "💊",
+                categoria = "Medicamentos"
+            ),
+            Medicamento(
+                id = 2,
+                nombre = "Vitamina C 1000mg",
+                descripcion = "Suplemento vitamínico para reforzar el sistema inmune.",
+                precio = "$8.200",
+                calificacion = "4.6",
+                enOferta = false,
+                imagenEmoji = "🍊",
+                categoria = "Vitaminas"
+            ),
+            Medicamento(
+                id = 3,
+                nombre = "Alcohol en Gel 250ml",
+                descripcion = "Desinfectante para manos de uso diario.",
+                precio = "$3.900",
+                calificacion = "4.9",
+                enOferta = true,
+                imagenEmoji = "🩹",
+                categoria = "Cuidado Personal"
+            ),
+            Medicamento(
+                id = 4,
+                nombre = "Pañales Etapa 1",
+                descripcion = "Pañales ultra absorbentes para recién nacidos.",
+                precio = "$18.300",
+                calificacion = "4.7",
+                enOferta = false,
+                imagenEmoji = "👶",
+                categoria = "Bebé y Maternidad"
+            ),
+            Medicamento(
+                id = 5,
+                nombre = "Protector Solar FPS 50",
+                descripcion = "Protección solar facial de alta eficacia.",
+                precio = "$14.800",
+                calificacion = "4.5",
+                enOferta = true,
+                imagenEmoji = "🧴",
+                categoria = "Dermocosmética"
+            ),
+            Medicamento(
+                id = 6,
+                nombre = "Ibuprofeno 400mg",
+                descripcion = "Antiinflamatorio y analgésico para el alivio de dolores articulares.",
+                precio = "$6.200",
+                calificacion = "4.7",
+                enOferta = false,
+                imagenEmoji = "💊",
+                categoria = "Medicamentos"
+            ),
+            Medicamento(
+                id = 7,
+                nombre = "Multivitamínico Completo",
+                descripcion = "Complejo B, zinc y minerales para la energía diaria.",
+                precio = "$12.900",
+                calificacion = "4.9",
+                enOferta = true,
+                imagenEmoji = "🍊",
+                categoria = "Vitaminas"
+            ),
+            Medicamento(
+                id = 8,
+                nombre = "Jabón Neutro Hipoalergénico",
+                descripcion = "Limpieza suave para pieles sensibles y delicadas.",
+                precio = "$5.400",
+                calificacion = "4.6",
+                enOferta = false,
+                imagenEmoji = "🩹",
+                categoria = "Cuidado Personal"
+            ),
+            Medicamento(
+                id = 9,
+                nombre = "Fórmula Láctea Maternidad 1",
+                descripcion = "Nutrición completa enriquecida con DHA e Hierro para lactantes.",
+                precio = "$24.500",
+                calificacion = "4.8",
+                enOferta = true,
+                imagenEmoji = "👶",
+                categoria = "Bebé y Maternidad"
+            ),
+            Medicamento(
+                id = 10,
+                nombre = "Sérum Ácido Hialurónico",
+                descripcion = "Hidratante facial intensivo para prevenir líneas de expresión.",
+                precio = "$19.900",
+                calificacion = "4.9",
+                enOferta = false,
+                imagenEmoji = "🧴",
+                categoria = "Dermocosmética"
+            )
+        )
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.initDefaultData(defaultMedicamentos)
+    }
 
 // ==========================================
 // COLECCIONES DE DATOS
@@ -113,130 +232,6 @@ fun PharmacyApp() {
         Categoria("👶", "Bebé y Maternidad"),
         Categoria("🧴", "Dermocosmética")
     )
-
-    val listaMedicamentos = listOf(
-        Medicamento(
-            id = 1,
-            nombre = "Paracetamol 500mg",
-            descripcion = "Analgésico y antipirético para aliviar el dolor y la fiebre.",
-            precio = "$4.500",
-            calificacion = "4.8",
-            enOferta = true,
-            imagenEmoji = "💊",
-            categoria = "Medicamentos"
-        ),
-        Medicamento(
-            id = 2,
-            nombre = "Vitamina C 1000mg",
-            descripcion = "Suplemento vitamínico para reforzar el sistema inmune.",
-            precio = "$8.200",
-            calificacion = "4.6",
-            enOferta = false,
-            imagenEmoji = "🍊",
-            categoria = "Vitaminas"
-        ),
-        Medicamento(
-            id = 3,
-            nombre = "Alcohol en Gel 250ml",
-            descripcion = "Desinfectante para manos de uso diario.",
-            precio = "$3.900",
-            calificacion = "4.9",
-            enOferta = true,
-            imagenEmoji = "🩹",
-            categoria = "Cuidado Personal"
-        ),
-        Medicamento(
-            id = 4,
-            nombre = "Pañales Etapa 1",
-            descripcion = "Pañales ultra absorbentes para recién nacidos.",
-            precio = "$18.300",
-            calificacion = "4.7",
-            enOferta = false,
-            imagenEmoji = "👶",
-            categoria = "Bebé y Maternidad"
-        ),
-        Medicamento(
-            id = 5,
-            nombre = "Protector Solar FPS 50",
-            descripcion = "Protección solar facial de alta eficacia.",
-            precio = "$14.800",
-            calificacion = "4.5",
-            enOferta = true,
-            imagenEmoji = "🧴",
-            categoria = "Dermocosmética"
-        ),
-        Medicamento(
-            id = 6,
-            nombre = "Ibuprofeno 400mg",
-            descripcion = "Antiinflamatorio y analgésico para el alivio de dolores articulares.",
-            precio = "$6.200",
-            calificacion = "4.7",
-            enOferta = false,
-            imagenEmoji = "💊",
-            categoria = "Medicamentos"
-        ),
-        Medicamento(
-            id = 7,
-            nombre = "Multivitamínico Completo",
-            descripcion = "Complejo B, zinc y minerales para la energía diaria.",
-            precio = "$12.900",
-            calificacion = "4.9",
-            enOferta = true,
-            imagenEmoji = "🍊",
-            categoria = "Vitaminas"
-        ),
-        Medicamento(
-            id = 8,
-            nombre = "Jabón Neutro Hipoalergénico",
-            descripcion = "Limpieza suave para pieles sensibles y delicadas.",
-            precio = "$5.400",
-            calificacion = "4.6",
-            enOferta = false,
-            imagenEmoji = "🩹",
-            categoria = "Cuidado Personal"
-        ),
-        Medicamento(
-            id = 9,
-            nombre = "Fórmula Láctea Maternidad 1",
-            descripcion = "Nutrición completa enriquecida con DHA e Hierro para lactantes.",
-            precio = "$24.500",
-            calificacion = "4.8",
-            enOferta = true,
-            imagenEmoji = "👶",
-            categoria = "Bebé y Maternidad"
-        ),
-        Medicamento(
-            id = 10,
-            nombre = "Sérum Ácido Hialurónico",
-            descripcion = "Hidratante facial intensivo para prevenir líneas de expresión.",
-            precio = "$19.900",
-            calificacion = "4.9",
-            enOferta = false,
-            imagenEmoji = "🧴",
-            categoria = "Dermocosmética"
-        )
-    )
-
-    val medicamentosFiltrados = listaMedicamentos.filter { med ->
-        val matchesSearch = med.nombre.contains(searchQuery, ignoreCase = true) ||
-                med.descripcion.contains(searchQuery, ignoreCase = true)
-        val matchesCategory = selectedCategory == null || med.categoria.equals(selectedCategory, ignoreCase = true)
-        matchesSearch && matchesCategory
-    }
-
-    fun increaseQuantity(medicamentoId: Int) {
-        val currentQuantity = cartQuantity[medicamentoId] ?: 0
-        cartQuantity = cartQuantity + (medicamentoId to (currentQuantity + 1))
-    }
-
-    fun decreaseQuantity(medicamentoId: Int) {
-        val currentQuantity = cartQuantity[medicamentoId] ?: 0
-        cartQuantity = if (currentQuantity > 1) {
-            cartQuantity + (medicamentoId to (currentQuantity - 1))
-        } else {
-            cartQuantity - medicamentoId
-        }
-    }
 
     val cartCount = cartQuantity.values.sum()
 
@@ -269,7 +264,7 @@ fun PharmacyApp() {
                 if (currentRoute == "inicio") {
                     OutlinedTextField(
                         value = searchQuery,
-                        onValueChange = { searchQuery = it },
+                        onValueChange = { viewModel.onSearchQueryChange(it) },
                         placeholder = { Text("Buscar medicamento...") },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -331,13 +326,11 @@ fun PharmacyApp() {
                 InicioScreen(
                     listaCategorias = listaCategorias,
                     selectedCategory = selectedCategory,
-                    onCategorySelect = { catName ->
-                        selectedCategory = if (selectedCategory == catName) null else catName
-                    },
+                    onCategorySelect = { viewModel.onCategorySelect(it) },
                     medicamentosFiltrados = medicamentosFiltrados,
                     cartQuantity = cartQuantity,
-                    onIncrease = { increaseQuantity(it) },
-                    onDecrease = { decreaseQuantity(it) }
+                    onIncrease = { viewModel.increaseQuantity(it) },
+                    onDecrease = { viewModel.decreaseQuantity(it) }
                 )
             }
             composable("carrito") {
@@ -345,8 +338,8 @@ fun PharmacyApp() {
                     cartQuantity = cartQuantity,
                     listaMedicamentos = listaMedicamentos,
                     totalFormatted = totalFormatted,
-                    onIncrease = { increaseQuantity(it) },
-                    onDecrease = { decreaseQuantity(it) }
+                    onIncrease = { viewModel.increaseQuantity(it) },
+                    onDecrease = { viewModel.decreaseQuantity(it) }
                 )
             }
             composable("perfil") {
@@ -606,16 +599,6 @@ fun CategoryCard(
 // ==========================================
 // CARD PARA MEDICAMENTO
 // ==========================================
-/*
-* Si la cantidad es 0, muestra agregar
-* al presionar agregar , la cantidad pasa a 1
-* Cuando la cantidad es mayor que cero, aparece - y +
-* Al presionar +, la cantidad aumenta
-* Al presionar -, la cantidad disminuye
-* Cuando la cantidad es 0, vuelve a aparecer agregar
-* En la barra inferior se ve la suma de las cantidades de todos los productos
-* */
-
 @Composable
 fun ProductCard(
     medicamento: Medicamento,
@@ -762,16 +745,5 @@ fun ProductCard(
                 }
             }
         }
-    }
-}
-
-// ==========================================
-// PREVISUALIZACIÓN
-// ==========================================
-@Preview(showBackground = true)
-@Composable
-fun PharmacyAppPreview() {
-    SistemaFarmaciaTheme {
-        PharmacyApp()
     }
 }
