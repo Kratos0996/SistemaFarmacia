@@ -7,6 +7,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -546,20 +548,157 @@ fun PerfilScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(24.dp))
-        Text(
-            text = "👤",
-            fontSize = 64.sp
-        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // AVATAR DE USUARIO
+        Box(
+            modifier = Modifier
+                .size(90.dp)
+                .clip(RoundedCornerShape(45.dp))
+                .background(MaterialTheme.colorScheme.primaryContainer),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "👤",
+                fontSize = 48.sp
+            )
+        }
+
         Spacer(modifier = Modifier.height(12.dp))
+
         Text(
-            text = "Usuario",
+            text = "Kevin Alarcón",
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold
         )
+
+        Text(
+            text = "kevin.alarcon@gestorpharma.com",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // BADGE DE FIDELIZACIÓN / PUNTOS
+        Surface(
+            color = MaterialTheme.colorScheme.tertiaryContainer,
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "⭐ Cliente VIP | 1.250 Puntos Pharma",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // TARJETAS RESUMEN DE ESTADO
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Card(
+                modifier = Modifier.weight(1f)
+            ) {
+                Column(
+                    modifier = Modifier.padding(12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(text = "📦", fontSize = 24.sp)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(text = "3 Pedidos", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium)
+                    Text(text = "En camino", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+
+            Card(
+                modifier = Modifier.weight(1f)
+            ) {
+                Column(
+                    modifier = Modifier.padding(12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(text = "🎟️", fontSize = 24.sp)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(text = "2 Cupones", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium)
+                    Text(text = "Disponibles", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // OPCIONES DEL PERFIL
+        Text(
+            text = "Mi Cuenta",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
+        )
+
+        PerfilOptionItem(emoji = "📜", titulo = "Historial de Compras", subtitulo = "Ver pedidos anteriores")
+        PerfilOptionItem(emoji = "📍", titulo = "Direcciones de Envío", subtitulo = "Calle 12 # 34 - 56")
+        PerfilOptionItem(emoji = "🔔", titulo = "Recordatorios de Medicamentos", subtitulo = "Avisos de toma de dosis")
+        PerfilOptionItem(emoji = "🏥", titulo = "Sucursal Favorita", subtitulo = "Sucursal Centro - 24/7")
+        PerfilOptionItem(emoji = "⚙️", titulo = "Configuración de la Cuenta", subtitulo = "Privacidad y seguridad")
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedButton(
+            onClick = { },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text(
+                text = "🚪 Cerrar Sesión",
+                color = MaterialTheme.colorScheme.error,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+    }
+}
+
+@Composable
+fun PerfilOptionItem(
+    emoji: String,
+    titulo: String,
+    subtitulo: String
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = emoji, fontSize = 24.sp)
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(text = titulo, fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.bodyMedium)
+                Text(text = subtitulo, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Text(text = "❯", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
+        }
     }
 }
 
