@@ -7,8 +7,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,7 +22,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -58,26 +58,12 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.sistemafarmacia.data.local.FarmaciaDatabase
 import com.example.sistemafarmacia.data.repository.FarmaciaRepository
+import com.example.sistemafarmacia.model.Categoria
+import com.example.sistemafarmacia.model.Medicamento
+import com.example.sistemafarmacia.model.Routes
 import com.example.sistemafarmacia.ui.theme.SistemaFarmaciaTheme
 import com.example.sistemafarmacia.viewmodel.FarmaciaViewModel
 import com.example.sistemafarmacia.viewmodel.FarmaciaViewModelFactory
-
-data class Medicamento(
-    val id: Int,
-    val nombre: String,
-    val descripcion: String,
-    val precio: String,
-    val calificacion: String = "4.8",
-    val enOferta: Boolean = false,
-    val imagenEmoji: String = "💊",
-    val imagenRes: Int? = null,
-    val categoria: String = "Medicamentos"
-)
-
-data class Categoria(
-    val emoji: String,
-    val nombre: String
-)
 
 // ==========================================
 // ACTIVIDAD PRINCIPAL
@@ -246,7 +232,7 @@ fun PharmacyApp(viewModel: FarmaciaViewModel) {
     val totalFormatted = "$${"%,d".format(totalCartValue).replace(",", ".")}"
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route ?: "inicio"
+    val currentRoute = navBackStackEntry?.destination?.route ?: Routes.HOME
 
     Scaffold(
         topBar = {
@@ -263,7 +249,7 @@ fun PharmacyApp(viewModel: FarmaciaViewModel) {
                         )
                     }
                 )
-                if (currentRoute == "inicio") {
+                if (currentRoute == Routes.HOME) {
                     OutlinedTextField(
                         value = searchQuery,
                         onValueChange = { viewModel.onSearchQueryChange(it) },
@@ -281,10 +267,10 @@ fun PharmacyApp(viewModel: FarmaciaViewModel) {
         bottomBar = {
             NavigationBar {
                 NavigationBarItem(
-                    selected = currentRoute == "inicio",
+                    selected = currentRoute == Routes.HOME,
                     onClick = {
-                        navController.navigate("inicio") {
-                            popUpTo("inicio") { saveState = true }
+                        navController.navigate(Routes.HOME) {
+                            popUpTo(Routes.HOME) { saveState = true }
                             launchSingleTop = true
                             restoreState = true
                         }
@@ -293,10 +279,10 @@ fun PharmacyApp(viewModel: FarmaciaViewModel) {
                     label = { Text("Inicio") }
                 )
                 NavigationBarItem(
-                    selected = currentRoute == "carrito",
+                    selected = currentRoute == Routes.CART,
                     onClick = {
-                        navController.navigate("carrito") {
-                            popUpTo("inicio") { saveState = true }
+                        navController.navigate(Routes.CART) {
+                            popUpTo(Routes.HOME) { saveState = true }
                             launchSingleTop = true
                             restoreState = true
                         }
@@ -305,10 +291,10 @@ fun PharmacyApp(viewModel: FarmaciaViewModel) {
                     label = { Text("Carrito ($cartCount)") }
                 )
                 NavigationBarItem(
-                    selected = currentRoute == "perfil",
+                    selected = currentRoute == Routes.PROFILE,
                     onClick = {
-                        navController.navigate("perfil") {
-                            popUpTo("inicio") { saveState = true }
+                        navController.navigate(Routes.PROFILE) {
+                            popUpTo(Routes.HOME) { saveState = true }
                             launchSingleTop = true
                             restoreState = true
                         }
@@ -321,10 +307,10 @@ fun PharmacyApp(viewModel: FarmaciaViewModel) {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = "inicio",
+            startDestination = Routes.HOME,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable("inicio") {
+            composable(Routes.HOME) {
                 InicioScreen(
                     listaCategorias = listaCategorias,
                     selectedCategory = selectedCategory,
@@ -335,7 +321,7 @@ fun PharmacyApp(viewModel: FarmaciaViewModel) {
                     onDecrease = { viewModel.decreaseQuantity(it) }
                 )
             }
-            composable("carrito") {
+            composable(Routes.CART) {
                 CarritoScreen(
                     cartQuantity = cartQuantity,
                     listaMedicamentos = listaMedicamentos,
@@ -344,7 +330,7 @@ fun PharmacyApp(viewModel: FarmaciaViewModel) {
                     onDecrease = { viewModel.decreaseQuantity(it) }
                 )
             }
-            composable("perfil") {
+            composable(Routes.PROFILE) {
                 PerfilScreen()
             }
         }

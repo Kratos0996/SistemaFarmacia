@@ -1,9 +1,9 @@
 package com.example.sistemafarmacia.data.repository
 
-import com.example.sistemafarmacia.Medicamento
 import com.example.sistemafarmacia.data.local.CartItemEntity
 import com.example.sistemafarmacia.data.local.FarmaciaDao
 import com.example.sistemafarmacia.data.local.MedicamentoEntity
+import com.example.sistemafarmacia.model.Medicamento
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
