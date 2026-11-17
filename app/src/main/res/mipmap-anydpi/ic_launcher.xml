@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android" xmlns:aapt="http://schemas.android.com/aapt" android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108"><group><clip-path android:pathData="M22,0H86A22,22 0,0 1,108,22V86A22,22 0,0 1,86,108H22A22,22 0,0 1,0,86V22A22,22 0,0 1,22,0Z" />
+    <path android:pathData="M0,0H108V108H0Z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:startX="5" android:startY="0" android:endX="100" android:endY="108" android:type="linear">
+                <item android:offset="0" android:color="#100D2C" />
+                <item android:offset="0.55" android:color="#24204F" />
+                <item android:offset="1" android:color="#4B245E" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <path android:pathData="M0,0H108V108H0Z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:centerX="48" android:centerY="43" android:gradientRadius="56" android:type="radial">
+                <item android:offset="0" android:color="#422FC9C2" />
+                <item android:offset="0.55" android:color="#1638CFC5" />
+                <item android:offset="1" android:color="#0038CFC5" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Órbitas de energía: la cruz y la cápsula permanecen en la zona segura. -->
+    <path android:pathData="M24,60C22,44 37,25 55,23C70,21 82,28 85,40"
+        android:fillColor="@android:color/transparent" android:strokeWidth="2"
+        android:strokeColor="#7057F3DE" android:strokeLineCap="round" />
+    <path android:pathData="M83,59C78,75 60,86 44,82C34,80 27,75 24,68"
+        android:fillColor="@android:color/transparent" android:strokeWidth="2"
+        android:strokeColor="#886A67DB" android:strokeLineCap="round" />
+    <path android:pathData="M31,69C43,79 64,78 79,65"
+        android:fillColor="@android:color/transparent" android:strokeWidth="1.5"
+        android:strokeColor="#445EFFE2" android:strokeLineCap="round" />
+    <!-- Cruz médica con halo y sombra que separa el emblema del fondo. -->
+    <path android:pathData="M40,28H51V38H61V49H51V60H40V49H30V38H40Z"
+        android:fillColor="#165FFFF0" android:strokeColor="#145FFFF0" android:strokeWidth="8" />
+    <group android:translateY="2">
+        <path android:pathData="M40,28H51V38H61V49H51V60H40V49H30V38H40Z"
+            android:fillColor="#081E39" />
+    </group>
+    <path android:pathData="M40,28H51V38H61V49H51V60H40V49H30V38H40Z"
+        android:strokeColor="#B5FFF1" android:strokeWidth="1" android:strokeLineJoin="round">
+        <aapt:attr name="android:fillColor">
+            <gradient android:startX="30" android:startY="28" android:endX="61" android:endY="60"
+                android:startColor="#BAFFEE" android:endColor="#24D9C8" android:type="linear" />
+        </aapt:attr>
+    </path>
+    <path android:pathData="M43,31H48" android:strokeColor="#E6FFF8"
+        android:strokeWidth="1.5" android:strokeLineCap="round" />
+    <!-- Cápsula diagonal: mitad coral y mitad marfil, con borde luminoso. -->
+    <group android:rotation="-42" android:pivotX="62" android:pivotY="57">
+        <group android:translateY="3">
+            <path android:pathData="M49,47H75A10,10 0,0 1,75,67H49A10,10 0,0 1,49,47Z"
+                android:fillColor="#C00A1026" android:strokeColor="#C00A1026" android:strokeWidth="4" />
+        </group>
+        <path android:pathData="M49,47H75A10,10 0,0 1,75,67H49A10,10 0,0 1,49,47Z"
+            android:fillColor="#F3FFFB" android:strokeColor="#BCFFF2" android:strokeWidth="1.5" />
+        <path android:pathData="M49,47H62V67H49A10,10 0,0 1,49,47Z">
+            <aapt:attr name="android:fillColor">
+                <gradient android:startX="39" android:startY="47" android:endX="62" android:endY="67"
+                    android:startColor="#FF97B7" android:endColor="#F64A79" android:type="linear" />
+            </aapt:attr>
+        </path>
+        <path android:pathData="M62,48V66" android:strokeColor="#513562" android:strokeAlpha="0.35"
+            android:strokeWidth="1.4" />
+        <path android:pathData="M47,51H56" android:strokeColor="#FFD4DF" android:strokeWidth="2"
+            android:strokeLineCap="round" />
+        <path android:pathData="M68,51H74" android:strokeColor="#FFFFFF" android:strokeWidth="2"
+            android:strokeLineCap="round" />
+    </group>
+    <!-- Destellos gruesos y mínimos para conservar claridad a 48 dp. -->
+    <path android:pathData="M74,25L75.8,29.2L80,31L75.8,32.8L74,37L72.2,32.8L68,31L72.2,29.2Z"
+        android:fillColor="#FFA6C3" />
+    <path android:pathData="M28,57A2.2,2.2 0,1 1,28,61.4A2.2,2.2 0,1 1,28,57Z"
+        android:fillColor="#63F7DD" />
+    <path android:pathData="M78,72A1.6,1.6 0,1 1,78,75.2A1.6,1.6 0,1 1,78,72Z"
+        android:fillColor="#B6A7FF" />
+</group></vector>
